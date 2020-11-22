@@ -21,12 +21,6 @@ Connection: Keep-Alive
 object HttpLexer {
 
   /**
-   * Parses start-line and returns a tuple of {@link zio.web.http.model.Method}, {@link zio.web.http.model.Uri} and {@link zio.web.http.model.Version}
-   *
-   * @return a tuple of Method, Uri and Version
-   */
-
-  /**
    *
    * Parses start-line and returns a tuple of {@link zio.web.http.model.Method}, {@link zio.web.http.model.Uri} and {@link zio.web.http.model.Version}
    *
