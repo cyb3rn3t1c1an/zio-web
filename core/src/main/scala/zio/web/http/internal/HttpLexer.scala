@@ -2,7 +2,7 @@ package zio.web.http.internal
 
 import zio.web.http.model.{ Method, Version }
 
-import scala.collection.mutable.Stack
+import scala.collection.mutable.Queue
 
 /*
 GET /hello.htm HTTP/1.1
@@ -50,9 +50,10 @@ object HttpLexer {
     val LF = 0x0A
     val SP = 0x20 // elements separated by space
 
-    var elements       = Stack[String]()
+    val elements       = Queue[String]()
     var currentElement = new StringBuilder
     var char           = reader.read()
+
     //there is no need in reading the whole http request, so reading till the end of the first line
     while (char != LF) {
 
@@ -64,9 +65,9 @@ object HttpLexer {
       })
 
       char match {
-        case SP => elements = elements :+ currentElement.toString; currentElement = new StringBuilder
+        case SP => elements += currentElement.toString(); currentElement = new StringBuilder
         case CR if elements.size == 2 =>
-          elements = elements :+ currentElement.toString; currentElement = new StringBuilder
+          elements += currentElement.toString(); currentElement = new StringBuilder
         case _ => currentElement.append(char.toChar)
       }
 
@@ -104,7 +105,7 @@ object HttpLexer {
     def checkCurrentElementSize(elementSize: Int, limit: Int): Unit =
       if (elementSize > limit) throw new IllegalStateException("Malformed HTTP start-line")
 
-    (handleMethod(elements.pop()), elements.pop(), handleVersion(elements.pop()))
+    (handleMethod(elements.dequeue()), elements.dequeue(), handleVersion(elements.dequeue()))
   }
 
   /**
