@@ -1,6 +1,6 @@
 package zio.web.http.internal
 
-import zio.web.http.model.{ Method, Version }
+import zio.web.http.model.{ Method, Uri, Version }
 
 import scala.collection.mutable.Queue
 
@@ -28,15 +28,14 @@ object HttpLexer {
    * @param methodLimit - defines maximum HTTP method length
    * @param uriLimit - defines maximum HTTP URI length (2048 search engine friendly)
    * @param versionLimit - defines maximum HTTP version length (according to the spec and available HTTP versions it can be 8)
-   * @return a tuple of Method, Uri (currently just a string) and Version
+   * @return a tuple of Method, Uri and Version
    */
   def parseStartLine(
     reader: java.io.Reader,
     methodLimit: Int = 7,
     uriLimit: Int = 2048,
     versionLimit: Int = 8
-  ): (Method, String, Version) = {
-    //TODO: parse URI into actual type instead of String
+  ): (Method, Uri, Version) = {
     //TODO: not sure that it actually supports HTTP 2, I just started digging into HTTP 2 and it looks like a different story
     // it uses something called frames and has a different layout
     //TODO: https://undertow.io/blog/2015/04/27/An-in-depth-overview-of-HTTP2.html
@@ -79,7 +78,7 @@ object HttpLexer {
     def checkCurrentElementSize(elementSize: Int, limit: Int): Unit =
       if (elementSize > limit) throw new IllegalStateException("Malformed HTTP start-line")
 
-    (Method.fromString(elements.dequeue()), elements.dequeue(), Version.fromString(elements.dequeue()))
+    (Method.fromString(elements.dequeue()), Uri.fromString(elements.dequeue()), Version.fromString(elements.dequeue()))
   }
 
   /**

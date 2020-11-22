@@ -101,6 +101,10 @@ object HttpLexerSpec extends DefaultRunnableSpec {
     testM("check empty input") {
       val result = Task(HttpLexer.parseStartLine(new StringReader(""))).run
       assertM(result)(fails(isSubtype[IllegalStateException](hasMessage(equalTo("Malformed HTTP start-line")))))
+    },
+    test("check URI") {
+      val (_, uri, _) = HttpLexer.parseStartLine(new StringReader("OPTIONS /hello.htm HTTP/1.1\r\nheaders and body"))
+      assert(uri.toString)(equalTo("/hello.htm"))
     }
   )
 }
