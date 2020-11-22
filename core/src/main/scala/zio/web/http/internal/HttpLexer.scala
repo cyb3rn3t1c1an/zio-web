@@ -76,35 +76,10 @@ object HttpLexer {
         throw new IllegalStateException("Malformed HTTP start-line")
     }
 
-    def handleMethod(method: String): Method =
-      method match {
-        case "OPTIONS" => Method.OPTIONS
-        case "GET"     => Method.GET
-        case "HEAD"    => Method.HEAD
-        case "POST"    => Method.POST
-        case "PUT"     => Method.PUT
-        case "PATCH"   => Method.PATCH
-        case "DELETE"  => Method.DELETE
-        case "TRACE"   => Method.TRACE
-        case "CONNECT" => Method.CONNECT
-        case _         => throw new IllegalArgumentException(s"Unable to handle method: $method")
-      }
-
-    /*def handleUri(uri: String): Uri = {
-      ???
-    }*/
-
-    def handleVersion(version: String): Version =
-      version match {
-        case "HTTP/1.1" => Version.V1_1
-        case "HTTP/2.0" => Version.V2
-        case _          => throw new IllegalArgumentException(s"Unable to handle version: $version")
-      }
-
     def checkCurrentElementSize(elementSize: Int, limit: Int): Unit =
       if (elementSize > limit) throw new IllegalStateException("Malformed HTTP start-line")
 
-    (handleMethod(elements.dequeue()), elements.dequeue(), handleVersion(elements.dequeue()))
+    (Method.fromString(elements.dequeue()), elements.dequeue(), Version.fromString(elements.dequeue()))
   }
 
   /**
