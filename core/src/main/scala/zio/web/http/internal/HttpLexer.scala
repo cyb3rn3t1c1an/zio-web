@@ -65,8 +65,7 @@ object HttpLexer {
       })
 
       char match {
-        case SP => elements += currentElement.toString(); currentElement = new StringBuilder
-        case CR if elements.size == 2 =>
+        case c if c == SP || (c == CR && elements.size == 2) =>
           elements += currentElement.toString(); currentElement = new StringBuilder
         case _ => currentElement.append(char.toChar)
       }
