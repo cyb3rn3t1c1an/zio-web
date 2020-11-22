@@ -88,6 +88,10 @@ object HttpLexerSpec extends DefaultRunnableSpec {
     testM("check invalid HTTP version") {
       val result = Task(HttpLexer.parseStartLine(new StringReader("POST /hello.htm HTTP2.0\r\nheaders and body"))).run
       assertM(result)(fails(isSubtype[IllegalArgumentException](hasMessage(equalTo("Unable to handle version: HTTP2.0")))))
+    },
+    testM("check empty input") {
+      val result = Task(HttpLexer.parseStartLine(new StringReader(""))).run
+      assertM(result)(fails(isSubtype[IllegalStateException](hasMessage(equalTo("Malformed HTTP start-line")))))
     }
   )
 }

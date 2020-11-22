@@ -32,8 +32,8 @@ object HttpLexer {
    *
    * @param reader - HTTP request
    * @param methodLimit - defines maximum HTTP method length
-   * @param uriLimit - defines maximum HTTP URI length
-   * @param versionLimit - defines maximum HTTP version length
+   * @param uriLimit - defines maximum HTTP URI length (2048 search engine friendly)
+   * @param versionLimit - defines maximum HTTP version length (according to the spec and available HTTP versions it can be 8)
    * @return a tuple of Method, Uri (currently just a string) and Version
    */
   def parseStartLine(reader: java.io.Reader, methodLimit: Int = 7, uriLimit: Int = 2048, versionLimit: Int = 8): (Method, String, Version) = {
@@ -42,7 +42,9 @@ object HttpLexer {
     // it uses something called frames and has a different layout
     //TODO: https://undertow.io/blog/2015/04/27/An-in-depth-overview-of-HTTP2.html
     //TODO: https://developers.google.com/web/fundamentals/performance/http2/
-    val versionLimit = 8 // according to the spec and current HTTP versions it's 8
+
+    require(reader != null)
+    require(reader.ready())
 
     // end of a line is CRLF
     val CR = 0x0D
