@@ -1,6 +1,6 @@
 package zio.web.http.internal
 
-import zio.web.http.model.{Method, Version}
+import zio.web.http.model.{ Method, Version }
 
 import scala.collection.mutable.Stack
 
@@ -30,7 +30,12 @@ object HttpLexer {
    * @param versionLimit - defines maximum HTTP version length (according to the spec and available HTTP versions it can be 8)
    * @return a tuple of Method, Uri (currently just a string) and Version
    */
-  def parseStartLine(reader: java.io.Reader, methodLimit: Int = 7, uriLimit: Int = 2048, versionLimit: Int = 8): (Method, String, Version) = {
+  def parseStartLine(
+    reader: java.io.Reader,
+    methodLimit: Int = 7,
+    uriLimit: Int = 2048,
+    versionLimit: Int = 8
+  ): (Method, String, Version) = {
     //TODO: parse URI into actual type instead of String
     //TODO: not sure that it actually supports HTTP 2, I just started digging into HTTP 2 and it looks like a different story
     // it uses something called frames and has a different layout
@@ -45,9 +50,9 @@ object HttpLexer {
     val LF = 0x0A
     val SP = 0x20 // elements separated by space
 
-    var elements = Stack[String]()
+    var elements       = Stack[String]()
     var currentElement = new StringBuilder
-    var char = reader.read()
+    var char           = reader.read()
     //there is no need in reading the whole http request, so reading till the end of the first line
     while (char != LF) {
 
@@ -60,7 +65,8 @@ object HttpLexer {
 
       char match {
         case SP => elements = elements :+ currentElement.toString; currentElement = new StringBuilder
-        case CR if elements.size == 2 => elements = elements :+ currentElement.toString; currentElement = new StringBuilder
+        case CR if elements.size == 2 =>
+          elements = elements :+ currentElement.toString; currentElement = new StringBuilder
         case _ => currentElement.append(char.toChar)
       }
 
@@ -70,36 +76,33 @@ object HttpLexer {
         throw new IllegalStateException("Malformed HTTP start-line")
     }
 
-    def handleMethod(method: String): Method = {
+    def handleMethod(method: String): Method =
       method match {
         case "OPTIONS" => Method.OPTIONS
-        case "GET" => Method.GET
-        case "HEAD" => Method.HEAD
-        case "POST" => Method.POST
-        case "PUT" => Method.PUT
-        case "PATCH" => Method.PATCH
-        case "DELETE" => Method.DELETE
-        case "TRACE" => Method.TRACE
+        case "GET"     => Method.GET
+        case "HEAD"    => Method.HEAD
+        case "POST"    => Method.POST
+        case "PUT"     => Method.PUT
+        case "PATCH"   => Method.PATCH
+        case "DELETE"  => Method.DELETE
+        case "TRACE"   => Method.TRACE
         case "CONNECT" => Method.CONNECT
-        case _ => throw new IllegalArgumentException(s"Unable to handle method: $method")
+        case _         => throw new IllegalArgumentException(s"Unable to handle method: $method")
       }
-    }
 
     /*def handleUri(uri: String): Uri = {
       ???
     }*/
 
-    def handleVersion(version: String): Version = {
+    def handleVersion(version: String): Version =
       version match {
         case "HTTP/1.1" => Version.V1_1
         case "HTTP/2.0" => Version.V2
-        case _ => throw new IllegalArgumentException(s"Unable to handle version: $version")
+        case _          => throw new IllegalArgumentException(s"Unable to handle version: $version")
       }
-    }
 
-    def checkCurrentElementSize(elementSize: Int, limit: Int): Unit = {
+    def checkCurrentElementSize(elementSize: Int, limit: Int): Unit =
       if (elementSize > limit) throw new IllegalStateException("Malformed HTTP start-line")
-    }
 
     (handleMethod(elements.pop()), elements.pop(), handleVersion(elements.pop()))
   }

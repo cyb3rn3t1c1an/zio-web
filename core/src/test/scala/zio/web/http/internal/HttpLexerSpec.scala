@@ -5,11 +5,12 @@ import java.io.StringReader
 import zio.Task
 import zio.test.Assertion._
 import zio.test._
-import zio.web.http.model.{Method, Version}
+import zio.web.http.model.{ Method, Version }
 
 import scala.util.Random
 
 object HttpLexerSpec extends DefaultRunnableSpec {
+
   def spec = suite("HttpLexerSpec")(
     test("check OPTIONS method") {
       val (method, _, _) = HttpLexer.parseStartLine(new StringReader("OPTIONS /hello.htm HTTP/1.1\r\nheaders and body"))
@@ -56,13 +57,18 @@ object HttpLexerSpec extends DefaultRunnableSpec {
       assert(version)(equalTo(Version.V2))
     },
     test("check long URI") {
-      val longString = "a"*2021
-      val (_, _, version) = HttpLexer.parseStartLine(new StringReader(s"POST https://absolute.uri/$longString HTTP/2.0\r\nheaders and body"))
+      val longString = "a" * 2021
+      val (_, _, version) = HttpLexer.parseStartLine(
+        new StringReader(s"POST https://absolute.uri/$longString HTTP/2.0\r\nheaders and body")
+      )
       assert(version)(equalTo(Version.V2))
     },
     testM("check too long URI") {
-      val longString = "a"*2028
-      val result = Task(HttpLexer.parseStartLine(new StringReader(s"POST https://absolute.uri/$longString HTTP/2.0\r\nheaders and body"))).run
+      val longString = "a" * 2028
+      val result = Task(
+        HttpLexer
+          .parseStartLine(new StringReader(s"POST https://absolute.uri/$longString HTTP/2.0\r\nheaders and body"))
+      ).run
       assertM(result)(fails(isSubtype[IllegalStateException](hasMessage(equalTo("Malformed HTTP start-line")))))
     },
     testM("check corrupted HTTP request (no space)") {
@@ -70,7 +76,8 @@ object HttpLexerSpec extends DefaultRunnableSpec {
       assertM(result)(fails(isSubtype[IllegalStateException](hasMessage(equalTo("Malformed HTTP start-line")))))
     },
     testM("check corrupted HTTP request (double CR)") {
-      val result = Task(HttpLexer.parseStartLine(new StringReader("POST /hello.htm HTTP/2.0\r\r\nheaders and body"))).run
+      val result =
+        Task(HttpLexer.parseStartLine(new StringReader("POST /hello.htm HTTP/2.0\r\r\nheaders and body"))).run
       assertM(result)(fails(isSubtype[IllegalStateException](hasMessage(equalTo("Malformed HTTP start-line")))))
     },
     testM("check corrupted HTTP request (random string)") {
@@ -87,7 +94,9 @@ object HttpLexerSpec extends DefaultRunnableSpec {
     },
     testM("check invalid HTTP version") {
       val result = Task(HttpLexer.parseStartLine(new StringReader("POST /hello.htm HTTP2.0\r\nheaders and body"))).run
-      assertM(result)(fails(isSubtype[IllegalArgumentException](hasMessage(equalTo("Unable to handle version: HTTP2.0")))))
+      assertM(result)(
+        fails(isSubtype[IllegalArgumentException](hasMessage(equalTo("Unable to handle version: HTTP2.0"))))
+      )
     },
     testM("check empty input") {
       val result = Task(HttpLexer.parseStartLine(new StringReader(""))).run
