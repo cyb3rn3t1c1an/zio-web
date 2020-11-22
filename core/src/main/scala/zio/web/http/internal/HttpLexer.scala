@@ -23,17 +23,25 @@ object HttpLexer {
   /**
    * Parses start-line and returns a tuple of {@link zio.web.http.model.Method}, {@link zio.web.http.model.Uri} and {@link zio.web.http.model.Version}
    *
-   * @param reader - HTTP request
    * @return a tuple of Method, Uri and Version
    */
-  def parseStartLine(reader: java.io.Reader): (Method, String, Version) = {
+
+  /**
+   *
+   * Parses start-line and returns a tuple of {@link zio.web.http.model.Method}, {@link zio.web.http.model.Uri} and {@link zio.web.http.model.Version}
+   *
+   * @param reader - HTTP request
+   * @param methodLimit - defines maximum HTTP method length
+   * @param uriLimit - defines maximum HTTP URI length
+   * @param versionLimit - defines maximum HTTP version length
+   * @return a tuple of Method, Uri (currently just a string) and Version
+   */
+  def parseStartLine(reader: java.io.Reader, methodLimit: Int = 7, uriLimit: Int = 2048, versionLimit: Int = 8): (Method, String, Version) = {
     //TODO: parse URI into actual type instead of String
     //TODO: not sure that it actually supports HTTP 2, I just started digging into HTTP 2 and it looks like a different story
     // it uses something called frames and has a different layout
     //TODO: https://undertow.io/blog/2015/04/27/An-in-depth-overview-of-HTTP2.html
     //TODO: https://developers.google.com/web/fundamentals/performance/http2/
-    val methodLimit = 7
-    val uriLimit = 2048
     val versionLimit = 8 // according to the spec and current HTTP versions it's 8
 
     // end of a line is CRLF
