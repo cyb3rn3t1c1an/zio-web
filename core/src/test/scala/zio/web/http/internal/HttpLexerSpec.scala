@@ -11,7 +11,7 @@ import scala.util.Random
 
 object HttpLexerSpec extends DefaultRunnableSpec {
 
-  def spec = suite("HttpLexerSpec")(
+  def spec = suite("HTTP start line parsing")(
     test("check OPTIONS method") {
       val (method, _, _) = HttpLexer.parseStartLine(new StringReader("OPTIONS /hello.htm HTTP/1.1\r\nheaders and body"))
       assert(method)(equalTo(Method.OPTIONS))
